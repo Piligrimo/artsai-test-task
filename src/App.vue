@@ -3,6 +3,7 @@
     <Header/>
     <v-main>
       <Graph />
+      <Table />
     </v-main>
   </v-app>
 </template>

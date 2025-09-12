@@ -1,5 +1,5 @@
 <template>
-  <v-container max-width="700">
+  <v-container max-width="900">
     <div>
       <h2>Показатели компании</h2>
       <v-select
@@ -87,7 +87,7 @@
       y: { 
           title: {
               display: true, 
-              text: metric.value.value === 'ctr' ? 'CTR (%)' : `${metric.value.title} (‰)`
+              text: metric.value.value === 'ctr' ? 'CTR (%)' : `EvPM ${metric.value.title} (‰)`
           }
       },
     }

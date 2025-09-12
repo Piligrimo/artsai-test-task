@@ -27,6 +27,16 @@ export default {
         } catch (e) {
             console.error(e)
         }
+    },
+
+    async getTable(options: {event?:string, type?: 'site'|'dma', page?: number, pageSize?: number}) {
+        try {
+            const {event, type, page, pageSize} = options
+            const { data } = await instance.get('/table', { params: {event, type, page, pageSize}})
+            return data
+        } catch (e) {
+            console.error(e)
+        }
     }
         
 }
