@@ -1,18 +1,28 @@
 <template>
-  <v-container max-width="900">
+  <v-container class="mt-4" max-width="900">
     <div>
-      <h2>Показатели компании</h2>
-      <v-select
-        v-model="metric"
-        :items="metricOptions"
-        item-title="title"
-        item-value="value"
-        label="Выберите показатель"
-        persistent-hint
-        return-object
-        single-line
+      <h2 class="mb-2">Показатели компании</h2>
+      <div class="select-container">
+        <p class="select-label">Выберите показатель</p>
+        <v-select
+          v-model="metric"
+          :items="metricOptions"
+          item-title="title"
+          item-value="value"
+          label="Выберите показатель"
+          persistent-hint
+          return-object
+          single-line
+          density="compact"
+        />
+      </div>
+      <v-skeleton-loader v-if="isPending" type="image" class="chart"/>
+      <Line 
+        v-else
+        class="chart bordered" 
+        :data="data"
+        :options="options"
       />
-      <Line :data="data" :options="options" />
     </div>
   </v-container>
 </template>
@@ -43,11 +53,14 @@
     Legend
   )
 
+  const isPending = ref(false)
   const chartData = ref([])
   const metric = ref(metricOptions[0])
 
   onBeforeMount(async () => {
+    isPending.value = true
     chartData.value = await api.getCtrChart()
+    isPending.value = false
   })
 
   const labels = computed(() => {
@@ -77,7 +90,6 @@
   })
 
   const options = computed(() => ({
-    responsive: true,
     plugins: {
         legend: {
             display: false
@@ -94,16 +106,19 @@
   }))
 
   watch(metric, async (val) => {
+    isPending.value = true
     if (val.value === 'ctr') {
       chartData.value = await api.getCtrChart()
     } else {
       chartData.value = await api.getMvPMChart(val.value)
     }
+    isPending.value = false
   })
 </script>
 
 <style>
-  .title {
-    text-align: center;
+  .chart {
+    max-height: 250px;
+    padding: 20px;
   }
 </style>

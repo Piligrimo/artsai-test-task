@@ -1,32 +1,42 @@
 <template>
   <v-container max-width="900">
     <div>
-      <h2>Агрегационные таблицы </h2>
-      <div class="select-container"> 
-        <v-select
-          v-model="event"
-          :items="selectOptions"
-          item-title="title"
-          item-value="value"
-          label="Выберите событие"
-          persistent-hint
-          return-object
-          single-line
-          @update:model-value="handleSelect"
-        />
-        <v-select
-          v-model="type"
-          :items="tableTypes"
-          item-title="title"
-          item-value="value"
-          :label="'Выберите тип'"
-          persistent-hint
-          return-object
-          single-line
-          @update:model-value="handleSelect"
-        />
+      <h2 class="mb-2">Агрегационные таблицы </h2>
+      <div class="selects-row"> 
+        <div class="select-container">
+          <p class="select-label">Выберите событие для EvPM</p>
+          <v-select
+            v-model="event"
+            :items="selectOptions"
+            item-title="title"
+            item-value="value"
+            label="Выберите событие"
+            persistent-hint
+            return-object
+            single-line
+            density="compact"
+            @update:model-value="handleSelect"
+          />
+        </div>
+        <div  class="select-container">
+          <p class="select-label">Выберите поле для агрегации</p>
+          <v-select
+            v-model="type"
+            :items="tableTypes"
+            item-title="title"
+            item-value="value"
+            :label="'Выберите поле'"
+            persistent-hint
+            return-object
+            single-line
+            density="compact"
+            @update:model-value="handleSelect"
+          />
+        </div>
       </div>
       <v-data-table-server 
+        class="bordered"
+        :loading="isPending"
         :items="tableData" 
         :headers="headers"
         :page="pagination.page"
@@ -45,6 +55,7 @@
   import { metricOptions } from '@/utils/metrics';
   import { computed, onBeforeMount, ref } from 'vue';
 
+  const isPending = ref(false)
   const tableData = ref([])
   const totalRows = ref(0)
 
@@ -70,12 +81,15 @@
 
 
   onBeforeMount(async () => {
+    isPending.value = true
     const {data, total}  = await api.getTable({
       event: event.value.value,
       type: type.value.value,
       page: pagination.value.page - 1,
       pageSize: pagination.value.itemsPerPage
     })
+    isPending.value = false
+
     tableData.value = data
     totalRows.value = total 
   })
@@ -90,23 +104,27 @@
   const updatePagination = async (options :{ page: any; itemsPerPage: any; }) => {
     const {page, itemsPerPage} = options
     pagination.value = {page, itemsPerPage}
+    isPending.value = true
     const {data, total}  = await api.getTable({
       event: event.value.value,
       type: type.value.value,
       page: pagination.value.page - 1,
       pageSize: pagination.value.itemsPerPage
     })
+    isPending.value = false
     tableData.value = data
     totalRows.value = total 
   } 
 
   const handleSelect = async () => {
+    isPending.value = true
     const {data, total}  = await api.getTable({
       event: event.value.value,
       type: type.value.value,
       page: 0,
       pageSize: pagination.value.itemsPerPage
     })
+    isPending.value = false
     pagination.value.page = 1
     tableData.value = data
     totalRows.value = total 
@@ -121,9 +139,8 @@
 </script>
 
 <style>
-  .select-container {
+  .selects-row {
     display: flex;
-    justify-content: space-between;
     gap: 20px;
   }
 </style>
